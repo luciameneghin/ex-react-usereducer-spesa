@@ -20,11 +20,16 @@ const ProductList = () => {
     }
   }
 
-  const updateProductQuantity = (productName) => { //productName == prodotto da cercare
+  const updateProductQuantity = (productName, quantity) => { //productName == prodotto da cercare
+    const quantityChange = Math.floor(quantity);
+    if (quantityChange < 1) {
+      removeFromCart(productName);
+      return;
+    }
     setAddedProducts((prev) =>
       prev.map((p) =>
         p.name === productName
-          ? { ...p, quantity: p.quantity + 1 }
+          ? { ...p, quantity: quantityChange }
           : p
       )
     );
@@ -38,7 +43,7 @@ const ProductList = () => {
 
 
   return (
-    <div>
+    <div className="container">
       <h2>Lista Prodotti</h2>
       <ul>
         {products.map((product, index) => (
@@ -51,14 +56,22 @@ const ProductList = () => {
         ))}
       </ul>
 
-      <div>
+      <div className="py-5">
         <h3>Prodotti nel carrello:</h3>
         {addedProducts.length > 0 && (
-          <div>
+          <div className="">
             <ul>
               {addedProducts.map((product, index) => (
                 <li key={index}>
-                  {product.name} – {product.price.toFixed(2)} € - quantità: {product.quantity} - totale: {(product.price * product.quantity).toFixed(2)}€
+                  {product.name} – {product.price.toFixed(2)} €
+                  <label>Quantità: </label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={product.quantity}
+                    onChange={(e) => updateProductQuantity(product.name, e.target.value)}
+                  />
+                  Totale: {(product.price * product.quantity).toFixed(2)}€
                   <button className='btn-remove' onClick={() => removeFromCart(product.name)}>Rimuovi dal carrello</button>
                 </li>
               ))}
