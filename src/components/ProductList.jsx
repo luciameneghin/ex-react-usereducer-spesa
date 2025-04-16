@@ -30,6 +30,13 @@ const ProductList = () => {
     );
   };
 
+  const removeFromCart = (productName) => {
+    setAddedProducts(prev =>
+      prev.filter(p => p.name !== productName)
+    );
+  };
+
+
   return (
     <div>
       <h2>Lista Prodotti</h2>
@@ -52,11 +59,21 @@ const ProductList = () => {
               {addedProducts.map((product, index) => (
                 <li key={index}>
                   {product.name} – {product.price.toFixed(2)} € - quantità: {product.quantity} - totale: {(product.price * product.quantity).toFixed(2)}€
+                  <button className='btn-remove' onClick={() => removeFromCart(product.name)}>Rimuovi dal carrello</button>
                 </li>
               ))}
             </ul>
           </div>
         )}
+      </div>
+
+      <div className="d-flex justify-content-around">
+        <h4>Totale carrello</h4>
+        <div>
+          <p>
+            {addedProducts.reduce((acc, product) => acc + product.price * product.quantity, 0).toFixed(2)} €
+          </p>
+        </div>
       </div>
     </div>
   );
