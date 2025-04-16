@@ -11,15 +11,24 @@ const ProductList = () => {
   const [addedProducts, setAddedProducts] = useState([]);
 
   const addToCart = (product) => {
-    setAddedProducts((prev) => {
-      const alredyAdded = prev.find(p => p.name === product.name);
-      if (alredyAdded) {
-        return prev
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    })
+    const alreadyInCart = addedProducts.find(p => p.name === product.name);
+
+    if (alreadyInCart) {
+      updateProductQuantity(product.name);
+    } else {
+      setAddedProducts(curr => [...curr, { ...product, quantity: 1 }]);
+    }
   }
 
+  const updateProductQuantity = (productName) => { //productName == prodotto da cercare
+    setAddedProducts((prev) =>
+      prev.map((p) =>
+        p.name === productName
+          ? { ...p, quantity: p.quantity + 1 }
+          : p
+      )
+    );
+  };
 
   return (
     <div>
@@ -27,7 +36,7 @@ const ProductList = () => {
       <ul>
         {products.map((product, index) => (
           <li key={index}>
-            {product.name} - {product.price}€
+            {product.name} - {product.price.toFixed(2)}€
             <button onClick={() => addToCart(product)} style={{ marginLeft: '10px' }}>
               Aggiungi al carrello
             </button>
@@ -42,7 +51,7 @@ const ProductList = () => {
             <ul>
               {addedProducts.map((product, index) => (
                 <li key={index}>
-                  {product.name} – {product.price}€ x {product.quantity}
+                  {product.name} – {product.price.toFixed(2)} € - quantità: {product.quantity} - totale: {(product.price * product.quantity).toFixed(2)}€
                 </li>
               ))}
             </ul>
@@ -54,14 +63,3 @@ const ProductList = () => {
 };
 
 export default ProductList;
-
-
-// const addToCart = (product) => {
-//   setAddedProducts((prev) => {
-//     const alreadyInCart = prev.find(p => p.name === product.name);
-//     if (alreadyInCart) {
-//       return prev; // Ignora se già presente
-//     }
-//     return [...prev, { ...product, quantity: 1 }];
-//   });
-// };
