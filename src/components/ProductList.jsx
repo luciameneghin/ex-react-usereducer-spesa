@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useReducer } from "react";
 
 const products = [
   { name: 'Mela', price: 0.5 },
@@ -7,39 +7,83 @@ const products = [
   { name: 'Pasta', price: 0.7 },
 ];
 
-const ProductList = () => {
-  const [addedProducts, setAddedProducts] = useState([]);
-
-  const addToCart = (product) => {
-    const alreadyInCart = addedProducts.find(p => p.name === product.name);
-
-    if (alreadyInCart) {
-      updateProductQuantity(product.name);
-    } else {
-      setAddedProducts(curr => [...curr, { ...product, quantity: 1 }]);
+const productReducer = (state, action) => {
+  switch (action.type) {
+    case 'ADD_PRODUCT': {
+      const alreadyInCart = state.find(p => p.name === action.payload.name);
+      if (alreadyInCart) {
+        return state.map(p =>
+          p.name === action.payload.name
+            ? { ...p, quantity: p.quantity + 1 }
+            : p
+        );
+      } else {
+        return [...state, { ...action.payload, quantity: 1 }];
+      }
     }
-  }
 
-  const updateProductQuantity = (productName, quantity) => { //productName == prodotto da cercare
-    const quantityChange = Math.floor(quantity);
-    if (quantityChange < 1) {
-      removeFromCart(productName);
-      return;
-    }
-    setAddedProducts((prev) =>
-      prev.map((p) =>
-        p.name === productName
-          ? { ...p, quantity: quantityChange }
+    case 'UPDATE_QUANTITY': {
+      const quantity = Math.floor(action.payload.quantity);
+      if (quantity < 1) {
+        return state.filter(p => p.name !== action.payload.name);
+      }
+      return state.map(p =>
+        p.name === action.payload.name
+          ? { ...p, quantity }
           : p
-      )
-    );
-  };
+      );
+    }
 
-  const removeFromCart = (productName) => {
-    setAddedProducts(prev =>
-      prev.filter(p => p.name !== productName)
-    );
-  };
+    case 'REMOVE_PRODUCT': {
+      return state.filter(p => p.name !== action.payload.name);
+    }
+
+    default:
+      return state;
+  }
+};
+
+
+const ProductList = () => {
+  // const [addedProducts, setAddedProducts] = useState([]);
+  const [addedProducts, dispatchProduct] = useReducer(productReducer, []);
+
+  const addToCart = (products) => {
+    dispatchProduct({ type: 'ADD_PRODUCT', payload: products });
+  }
+  const updateProductQuantity = (productName, quantity) => { dispatchProduct({ type: 'UPDATE_QUANTITY', payload: { productName, quantity } }) }
+
+  const removeFromCart = (productName) => { dispatchProduct({ type: 'REMOVE_PRODUCT', payload: { name: productName } }) }
+  // const addToCart = (product) => {
+  //   const alreadyInCart = addedProducts.find(p => p.name === product.name);
+
+  //   if (alreadyInCart) {
+  //     updateProductQuantity(product.name);
+  //   } else {
+  //     setAddedProducts(curr => [...curr, { ...product, quantity: 1 }]);
+  //   }
+  //}
+
+  // const updateProductQuantity = (productName, quantity) => { //productName == prodotto da cercare
+  //   const quantityChange = Math.floor(quantity);
+  //   if (quantityChange < 1) {
+  //     removeFromCart(productName);
+  //     return;
+  //   }
+  //   setAddedProducts((prev) =>
+  //     prev.map((p) =>
+  //       p.name === productName
+  //         ? { ...p, quantity: quantityChange }
+  //         : p
+  //     )
+  //   );
+  // };
+
+  // const removeFromCart = (productName) => {
+  //   setAddedProducts(prev =>
+  //     prev.filter(p => p.name !== productName)
+  //   );
+  // };
 
 
   return (
