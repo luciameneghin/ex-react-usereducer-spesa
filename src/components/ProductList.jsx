@@ -1,4 +1,4 @@
-import { useState, useReducer } from "react";
+import { useReducer } from "react";
 
 const products = [
   { name: 'Mela', price: 0.5 },
@@ -23,12 +23,12 @@ const productReducer = (state, action) => {
     }
 
     case 'UPDATE_QUANTITY': {
-      const quantity = Math.floor(action.payload.quantity);
-      if (quantity < 1) {
-        return state.filter(p => p.name !== action.payload.name);
+      const { name, quantity } = action.payload;
+      if (quantity < 1 || isNaN(quantity)) {
+        return;
       }
       return state.map(p =>
-        p.name === action.payload.name
+        p.name === name
           ? { ...p, quantity }
           : p
       );
@@ -45,45 +45,16 @@ const productReducer = (state, action) => {
 
 
 const ProductList = () => {
-  // const [addedProducts, setAddedProducts] = useState([]);
   const [addedProducts, dispatchProduct] = useReducer(productReducer, []);
 
   const addToCart = (products) => {
     dispatchProduct({ type: 'ADD_PRODUCT', payload: products });
   }
-  const updateProductQuantity = (productName, quantity) => { dispatchProduct({ type: 'UPDATE_QUANTITY', payload: { productName, quantity } }) }
+  const updateProductQuantity = (productName, quantity) => {
+    dispatchProduct({ type: 'UPDATE_QUANTITY', payload: { name: productName, quantity } });
+  }
 
   const removeFromCart = (productName) => { dispatchProduct({ type: 'REMOVE_PRODUCT', payload: { name: productName } }) }
-  // const addToCart = (product) => {
-  //   const alreadyInCart = addedProducts.find(p => p.name === product.name);
-
-  //   if (alreadyInCart) {
-  //     updateProductQuantity(product.name);
-  //   } else {
-  //     setAddedProducts(curr => [...curr, { ...product, quantity: 1 }]);
-  //   }
-  //}
-
-  // const updateProductQuantity = (productName, quantity) => { //productName == prodotto da cercare
-  //   const quantityChange = Math.floor(quantity);
-  //   if (quantityChange < 1) {
-  //     removeFromCart(productName);
-  //     return;
-  //   }
-  //   setAddedProducts((prev) =>
-  //     prev.map((p) =>
-  //       p.name === productName
-  //         ? { ...p, quantity: quantityChange }
-  //         : p
-  //     )
-  //   );
-  // };
-
-  // const removeFromCart = (productName) => {
-  //   setAddedProducts(prev =>
-  //     prev.filter(p => p.name !== productName)
-  //   );
-  // };
 
 
   return (
@@ -113,7 +84,7 @@ const ProductList = () => {
                     type="number"
                     min="1"
                     value={product.quantity}
-                    onChange={(e) => updateProductQuantity(product.name, e.target.value)}
+                    onChange={(e) => updateProductQuantity(product.name, parseInt(e.target.value))}
                   />
                   Totale: {(product.price * product.quantity).toFixed(2)}€
                   <button className='btn-remove' onClick={() => removeFromCart(product.name)}>Rimuovi dal carrello</button>
